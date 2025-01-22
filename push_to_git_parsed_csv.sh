@@ -1,27 +1,26 @@
-# Configuration
-CSV_FILE="parsed_nginx_log.csv"  # Replace with your CSV file name
-REPO_PATH="/Users/ob/Documents/testdevops"   # Replace with your Git repository path
-COMMIT_MESSAGE="Update parsed NGINX log" # Commit message
+#!/bin/sh
 
-# Navigate to the Git repository
-cd "$REPO_PATH" || { echo "Error: Repository path not found."; exit 1; }
-
-# Check if the CSV file exists
-if [[ -f "$CSV_FILE" ]]; then
-    # Stage the CSV file
-    echo "Adding $CSV_FILE to Git..."
-    git add "$CSV_FILE"
-
-    # Commit the changes
-    echo "Committing changes..."
-    git commit -m "$COMMIT_MESSAGE"
-
-    # Push the changes
-    echo "Pushing changes to remote repository..."
-    git push
-
-    echo "CSV file successfully committed and pushed to the repository."
-else
-    echo "Error: $CSV_FILE not found in $REPO_PATH."
+# Ensure required environment variables are set
+if [ -z "$GIT_USER_NAME" ] || [ -z "$GIT_USER_EMAIL" ] || [ -z "$GIT_REPO" ]; then
+    echo "Error: Missing GIT_USER_NAME, GIT_USER_EMAIL, or GIT_REPO environment variables."
     exit 1
 fi
+
+# Configure Git
+git config --global user.name "$GIT_USER_NAME"
+git config --global user.email "$GIT_USER_EMAIL"
+
+# Clone the repository
+if [ ! -d "/app/repo" ]; then
+    git clone "$GIT_REPO" /app/repo
+fi
+
+cd /app/repo || exit
+
+# Copy the parsed file to the repo
+cp /app/parsed_nginx_log.csv .
+
+# Commit and push changes
+git add parsed_nginx_log.csv
+git commit -m "Automated commit for parsed NGINX log"
+git push origin main
