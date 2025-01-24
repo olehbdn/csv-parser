@@ -1,6 +1,6 @@
 ## CSV Parser and Git Automation
 
-This application parsing `nginx.log` file to CSV form and automatically pushing parsed `.csv` file to Git repository using Docker
+This application parsing nginx.log files to CSV and automatically pushing parsed `.csv` file to Git repository using Docker
 
 ### Requirements
 
@@ -16,30 +16,26 @@ git clone https://github.com/olehbdn/csv-parser.git
 cd csv-parser
 ```
 
-### 2. Build the Docker Image
+### 2. Prepare .env file for flexibility of the app
+Modify .env.example and rename it to .env afterwards with the environmental variables:
+```
+#Variables for the github 
+GIT_USER_NAME="username"
+GIT_USER_EMAIL="email"
+GIT_REPO=https://your-github-token@github.com/username/reponame.git
+```
+
+### 3. Build the Docker Image
 Build the Docker image using the included Dockerfile:
 ```bash
-docker build -t csv-parser .
+docker build -t parser_git_push-ct .
 ```
 
-### 3. Run the Docker Container
-#### Option 1: using credentials while running docker
-Run the container with the appropriate environment variables:
-```bash
-docker run --rm \
-  -e GIT_USER_NAME="your_username" \
-  -e GIT_USER_EMAIL="your_email@example.com" \
-  -e GIT_REPO="https://<your_token>@github.com/olehbdn/csv-parser.git" \
-  csv-parser
+### 4. Run the Docker Container
+Command will parse all the nginx log files inside /local/path/logs folder. Also it will mount that folders to the container.
 ```
-#### Option 2: using `.env` file with `--env-file` flag
+docker run --env-file .env -v /local/path/logs:/app/nginx_logs -v /local/path/parsed/logs:/app/parsed_nginx_logs parser_git_push-ct
+```
 
-a) Create a `.env` file inside directory alongside files cloned from repo.
-
-`.gitingone` already have .env file line inside, so you can be sure your sensitive data stay only locally.
-
-b) run
-```docker run --rm --env-file .env csv-parser```
-
-#### 4. Check Output
-The parsed CSV file (parsed_nginx_log.csv) will be committed and pushed to the specified Git repository.
+### 5. Check Output
+The parsed CSV file will be committed and pushed to the specified Git repository.

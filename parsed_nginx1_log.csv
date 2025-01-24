@@ -1,2 +1,0 @@
-IP,Timestamp,Method,URL,Protocol,Status,ResponseSize,Referrer,UserAgent
-162.55.33.98,26/Apr/2021:21:20:22 +0000,GET,/api/datasources/proxy/1/api/v1/query_range?query=probe_http_status_code%7Btarget%3D~%22()%22%7D&start=1619471700&end=1619472000&step=30,HTTP/2.0,200,210,https://grafana.itoutposts.com/d/xtkCtBkiz/blackbox-exporter-overview?orgId=1&refresh=5s,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36
