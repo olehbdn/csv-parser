@@ -19,7 +19,6 @@ cd csv-parser
 ### 2. Prepare .env file for flexibility of the app
 Modify .env.example and rename it to .env afterwards with the environmental variables:
 ```
-#Variables for the github 
 GIT_USER_NAME="username"
 GIT_USER_EMAIL="email"
 GIT_REPO=https://your-github-token@github.com/username/reponame.git
