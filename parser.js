@@ -1,29 +1,46 @@
-const fs = require('fs'); // Import the File System module
+const fs = require('fs'); // File system module
+const path = require('path'); // Path module
 
-// Input and output files
-const logFile = 'nginx.log'; // Replace with your log file
-const csvFile = 'parsed_nginx_log.csv'; // Replace with your desired output file
+// Input and output directories from environment variables
+const logDir = process.env.LOG_DIR || '/app/nginx_logs';
+const outputDir = process.env.OUTPUT_DIR || '/app/parsed_nginx_logs';
 
 // Regex pattern for parsing log entries
 const logPattern = /^(?<ip>[\d.]+) - - \[(?<timestamp>[^\]]+)] "(?<method>\w+) (?<url>[^ ]+) (?<protocol>[^"]+)" (?<status>\d+) (?<response_size>\d+) "(?<referrer>[^"]+)" "(?<user_agent>[^"]+)"/;
 
-// Read the log file
-const logContent = fs.readFileSync(logFile, 'utf8'); // Read file synchronously as a UTF-8 string
-const lines = logContent.split('\n').filter(Boolean); // Remove empty lines
-
-// Parse each line into an array of objects
-const data = lines.map((line) => {
-    const match = logPattern.exec(line);
-    if (match) {
-        const { ip, timestamp, method, url, protocol, status, response_size, referrer, user_agent } = match.groups;
-        return [ip, timestamp, method, url, protocol, status, response_size, referrer, user_agent];
+try {
+    // Ensure the output directory exists
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
     }
-}).filter(Boolean); // Filter out any undefined values
 
-// Prepare CSV content
-const header = 'IP,Timestamp,Method,URL,Protocol,Status,ResponseSize,Referrer,UserAgent\n';
-const csvContent = header + data.map(row => row.join(',')).join('\n');
+    // Read log files in the input directory
+    const logFiles = fs.readdirSync(logDir).filter(file => file.endsWith('.log'));
 
-// Write CSV content to file
-fs.writeFileSync(csvFile, csvContent);
-console.log(`Log data successfully written to ${csvFile}`);
+    logFiles.forEach(logFile => {
+        const inputPath = path.join(logDir, logFile);
+        const outputFileName = `parsed_${logFile.replace(/\.log$/, '_log.csv')}`;
+        const outputPath = path.join(outputDir, outputFileName);
+
+        // Read and parse the log file
+        const logContent = fs.readFileSync(inputPath, 'utf8');
+        const lines = logContent.split('\n').filter(Boolean);
+
+        const data = lines.map(line => {
+            const match = logPattern.exec(line);
+            if (match) {
+                const { ip, timestamp, method, url, protocol, status, response_size, referrer, user_agent } = match.groups;
+                return [ip, timestamp, method, url, protocol, status, response_size, referrer, user_agent];
+            }
+        }).filter(Boolean);
+
+        // Write to CSV
+        const header = 'IP,Timestamp,Method,URL,Protocol,Status,ResponseSize,Referrer,UserAgent\n';
+        const csvContent = header + data.map(row => row.join(',')).join('\n');
+        fs.writeFileSync(outputPath, csvContent);
+
+        console.log(`Parsed ${logFile} -> ${outputFileName}`);
+    });
+} catch (err) {
+    console.error(`Error: ${err.message}`);
+}

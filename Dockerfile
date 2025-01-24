@@ -1,23 +1,18 @@
+# Use Node.js 18 on Alpine Linux as the base image
 FROM node:18-alpine
 
-#Set the working directory inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-#Install Git
+# Install Git
 RUN apk add --no-cache git
 
-#Copy application files into the container
+# Copy the application files into the container
 COPY parser.js /app/
 COPY push_to_git_parsed_csv.sh /app/
-COPY nginx.log /app/
 
-#Set permissions for the script
+# Set permissions for the shell script
 RUN chmod +x /app/push_to_git_parsed_csv.sh
 
-#Define environment variables for Git credentials
-ENV GIT_USER_NAME="default_user"
-ENV GIT_USER_EMAIL="default_email@example.com"
-ENV GIT_REPO=""
-
-#Define the default command
-CMD ["sh", "-c", "node parser.js && ./push_to_git_parsed_csv.sh"]
+# Specify the default command to run
+CMD ["sh", "-c", "node /app/parser.js && /app/push_to_git_parsed_csv.sh"]
